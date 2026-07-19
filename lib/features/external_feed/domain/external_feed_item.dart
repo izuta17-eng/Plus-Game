@@ -28,8 +28,9 @@ class ExternalFeedItem {
     }
     final host = url.host.toLowerCase();
     final source = switch (host) {
-      'youtube.com' || 'www.youtube.com' || 'youtu.be' =>
-        ExternalFeedSource.youtube,
+      'youtube.com' ||
+      'www.youtube.com' ||
+      'youtu.be' => ExternalFeedSource.youtube,
       'twitch.tv' || 'www.twitch.tv' => ExternalFeedSource.twitch,
       _ => throw const FormatException('External feed host is not allowed'),
     };

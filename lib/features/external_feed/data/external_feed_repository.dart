@@ -32,10 +32,11 @@ class ExternalFeedRepository {
     }
     final feed = ExternalFeed.fromJson(decoded);
     final seenUrls = <String>{};
-    final items = feed.items
-        .where((item) => seenUrls.add(item.url.toString()))
-        .toList(growable: false)
-      ..sort((a, b) => b.publishedAt.compareTo(a.publishedAt));
+    final items =
+        feed.items
+            .where((item) => seenUrls.add(item.url.toString()))
+            .toList(growable: false)
+          ..sort((a, b) => b.publishedAt.compareTo(a.publishedAt));
     return ExternalFeed(updatedAt: feed.updatedAt, items: items);
   }
 }
