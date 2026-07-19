@@ -51,7 +51,7 @@ class ExternalFeedSection extends ConsumerWidget {
               ),
               if (value.updatedAt case final updatedAt?)
                 Text(
-                  '更新: ' + _formatDateTime(updatedAt),
+                  '更新: ${_formatDateTime(updatedAt)}',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
             ],
@@ -76,7 +76,7 @@ class ExternalFeedCard extends StatelessWidget {
         onTap: () => _open(context),
         child: Semantics(
           button: true,
-          label: '外部サイトで開く: ' + item.title,
+          label: '外部サイトで開く: ${item.title}',
           child: Padding(
             padding: const EdgeInsets.all(18),
             child: Row(
@@ -115,7 +115,7 @@ class ExternalFeedCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        '公開: ' + _formatDateTime(item.publishedAt),
+                        '公開: ${_formatDateTime(item.publishedAt)}',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -155,13 +155,6 @@ class ExternalFeedCard extends StatelessWidget {
 String _formatDateTime(DateTime value) {
   final local = value.toLocal();
   String twoDigits(int number) => number.toString().padLeft(2, '0');
-  return local.year.toString() +
-      '/' +
-      twoDigits(local.month) +
-      '/' +
-      twoDigits(local.day) +
-      ' ' +
-      twoDigits(local.hour) +
-      ':' +
-      twoDigits(local.minute);
+  return '${local.year}/${twoDigits(local.month)}/${twoDigits(local.day)} '
+      '${twoDigits(local.hour)}:${twoDigits(local.minute)}';
 }

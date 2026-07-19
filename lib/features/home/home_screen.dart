@@ -35,7 +35,7 @@ class HomeScreen extends ConsumerWidget {
                     spacing: 8,
                     children: [
                       FilledButton(
-                        onPressed: () => context.go('/game/' + today.id),
+                        onPressed: () => context.go('/game/${today.id}'),
                         child: const Text('詳細を見る'),
                       ),
                       OutlinedButton(
