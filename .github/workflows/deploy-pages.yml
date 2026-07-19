@@ -1,39 +1,60 @@
-name: Deploy Flutter Web to GitHub Pages
+name: Validate and deploy Flutter Web
 
 on:
   push:
     branches:
       - main
+  pull_request:
+  schedule:
+    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: plus-game-pages-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  validate-and-build:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Restore the latest published feed for fallback
+        if: github.event_name != 'pull_request'
+        continue-on-error: true
+        run: |
+          curl --fail --silent --show-error --location --retry 2 \
+            https://izuta17-eng.github.io/Plus-Game/assets/assets/data/external_feed.json \
+            --output assets/data/external_feed.json
+
+      - name: Fetch official external feed for pull request
+        if: github.event_name == 'pull_request'
+        run: python3 scripts/fetch_external_feed.py
+
+      - name: Fetch official external feed for deployment
+        if: github.event_name != 'pull_request'
+        env:
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+        run: python3 scripts/fetch_external_feed.py
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.44.6'
           cache: true
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed lib test
 
       - name: Analyze
         run: flutter analyze
@@ -41,21 +62,30 @@ jobs:
       - name: Test
         run: flutter test
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
       - name: Build Flutter Web
         run: |
           flutter build web --release --base-href "/Plus-Game/"
           cp build/web/index.html build/web/404.html
 
       - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: build/web
 
+  deploy-pages:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: validate-and-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

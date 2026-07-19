@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../core/data/game_repository.dart';
 import '../../core/domain/game.dart';
 import '../../shared/widgets/game_widgets.dart';
 import '../../shared/widgets/state_widgets.dart';
+import '../external_feed/presentation/external_feed_section.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) => ref
       .watch(gamesProvider)
@@ -51,6 +54,7 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
               ),
+              const ExternalFeedSection(),
               Section(
                 title: '開催中イベント',
                 child: GameCard(game: games[1]),
